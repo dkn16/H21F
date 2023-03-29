@@ -67,23 +67,21 @@ def kernel(X, Z, var, length, noise, jitter=1.0e-14,is_noise=True):
 
 def model(X, Y):
     # set weakly informative priors on our three kernel hyperparameters
-    var_mean = numpyro.sample("var_mean", dist.HalfNormal(1))
+    #var_mean = numpyro.sample("var_mean", dist.HalfNormal(1))
     var_std = numpyro.sample("var_std", dist.HalfNormal(1))
 
     
-    length_mean = numpyro.sample("length_mean", dist.InverseGamma(10,2))
-    length_std = numpyro.sample("length_std", dist.HalfNormal(1))
+    length_alpha = numpyro.sample("length_alpha", dist.LogNormal(2.5,2))
+    length_beta = numpyro.sample("length_beta",  dist.LogNormal(0.5,2))
     
     noise_mean = numpyro.sample("noise_mean", dist.HalfNormal(1))
-    noise_std = numpyro.sample("noise_std", dist.HalfNormal(1))
+    noise_std = numpyro.sample("noise_std", dist.HalfNormal(0.5))
     
     #sample for the var and length
-    var_ksi = numpyro.sample("kernel_var",dist.Normal(loc=jnp.zeros(Y.shape[0])))
-    length_ksi = numpyro.sample("kernel_length",dist.Normal(loc=jnp.zeros(Y.shape[0])))
+    var = numpyro.sample("kernel_var",dist.HalfNormal(scale=jnp.ones(Y.shape[0])*var_std))
+    length = numpyro.sample("kernel_length",dist.InverseGamma(jnp.ones(Y.shape[0])*length_alpha,jnp.ones(Y.shape[0])*length_beta))
     noise_ksi = numpyro.sample("kernel_noise",dist.Normal(loc=jnp.zeros(Y.shape[0])))
-    
-    var = var_std*var_ksi+var_mean
-    length = length_std*length_ksi+length_mean
+
     noise = noise_std*noise_ksi+noise_mean
     
     X=jnp.repeat(jnp.array([X]),Y.shape[0],axis=0)
@@ -122,10 +120,10 @@ def run_inference(model,init_strategy, rng_key, X, Y):
         init_strategy = init_to_sample()
     elif init_strategy == "uniform":
         init_strategy = init_to_uniform(radius=1)
-    kernel = NUTS(model, init_strategy=init_strategy,target_accept_prob=0.7,max_tree_depth=7)
+    kernel = NUTS(model, init_strategy=init_strategy,target_accept_prob=0.8,max_tree_depth=8)
     mcmc = MCMC(
         kernel,
-        num_warmup=1000,
+        num_warmup=2000,
         num_samples=2000,
         num_chains=1,
         thinning=10,
@@ -194,9 +192,9 @@ def make_predictions(samples):
     X, Y, X_test = get_data()
     rng_key, rng_key_predict = random.split(random.PRNGKey(42))
     # do prediction
-    kernel_var = samples["kernel_var"].T*samples["var_std"]+samples["var_mean"]
+    kernel_var = samples["kernel_var"]
     kernel_noise = samples["kernel_noise"].T*samples["noise_std"]+samples["noise_mean"]
-    kernel_length = samples["kernel_length"].T*samples["length_std"]+samples["length_mean"]
+    kernel_length = samples["kernel_length"]
     #print(kernel_var.shape)
     #vmap_args = (
     #    random.split(rng_key_predict, samples["var_std"].shape[0]),
@@ -212,7 +210,7 @@ def make_predictions(samples):
     means = []
     for i in range(samples["var_std"].shape[0]):
         means.append(predict(
-           rng_key, X, Y, X_test, kernel_var.T[i], kernel_noise.T[i], kernel_noise.T[i]
+           rng_key, X, Y, X_test, kernel_var[i], kernel_length[i], kernel_noise.T[i]
         ))
     #print(means）
     mean_prediction = np.mean(means, axis=0)
@@ -225,6 +223,6 @@ numpyro.set_platform('gpu')
 numpyro.set_host_device_count(1)
 samples = main()
 jnp.save('samples.npy',samples)
-mean_prediction,percentiles = make_predictions(samples)
-jnp.save('mean.npy',mean_prediction)
-jnp.save('percentile.npy',percentiles)
+#mean_prediction,percentiles = make_predictions(samples)
+#jnp.save('mean.npy',mean_prediction)
+#jnp.save('percentile.npy',percentiles)

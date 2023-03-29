@@ -1,0 +1,9 @@
+#PBS -N GP21cmFg
+#PBS -j oe
+#PBS -l select=1:ncpus=8:mem=40gb:ngpus=4
+
+cd /work/dkn16/GP21cmFg/
+source activate base
+export XLA_PYTHON_CLIENT_PREALLOCATE=False
+export XLA_PYTHON_CLIENT_ALLOCATOR=platform
+CUDA_VISIBLE_DEVICES=8,1,2,3,4 python GP_realisticmodel_distribute_hierachy_superpixel.py
