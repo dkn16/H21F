@@ -105,42 +105,39 @@ def kernel_pol(X, Z, var, length,var_pol,length_pol,var_HI,length_HI, noise, jit
     return k_fg + k_pol
 
 def model(X, Y):
-    #set weakly-informative log-normal priors on all kernel hyperparameters
+    # set weakly-informative log-normal priors on our three kernel hyperparameters
     var_fg_std = numpyro.sample("varfg_std", dist.LogNormal(0,4))
     
     length_fg_alpha = numpyro.sample("length_fg_alpha",dist.LogNormal(1,4))
     length_fg_beta = numpyro.sample("length_fg_beta",dist.LogNormal(0,4))
-    
+
     noise = numpyro.sample("kernel_noise", dist.HalfNormal(10))
     
+    #var_pol_std = numpyro.sample("varpol_std", dist.HalfNormal(5))
     
-    var_pol_std = numpyro.sample("varpol_std", dist.LogNormal(0,4))
-    
-    length_pol_mean = numpyro.sample("length_pol_mean",dist.LogNormal(1,4))
-    length_pol_std = numpyro.sample("length_pol_std",dist.LogNormal(0,4))
+    #length_pol_mean = numpyro.sample("length_pol_mean",dist.Normal(0.25,1))
+    #length_pol_std = numpyro.sample("length_pol_std",dist.HalfNormal(0.5))
     
     var_HI = numpyro.sample("kernel_varHI", dist.HalfNormal(1))
     length_HI = numpyro.sample("kernel_lengthHI",dist.HalfNormal(2))
     var_fg = numpyro.sample("kernel_var", dist.HalfNormal(jnp.ones(Y.shape[1])*var_fg_std))
     length_fg = numpyro.sample("kernel_length", dist.InverseGamma(jnp.ones(Y.shape[1])*length_fg_alpha,jnp.ones(Y.shape[1])*length_fg_beta))
-    var_pol = numpyro.sample("kernel_varpol", dist.HalfNormal(jnp.ones(Y.shape[1])*var_pol_std))
-    length_pol = numpyro.sample("kernel_lengthpol", dist.InverseGamma(jnp.ones(Y.shape[1])*length_pol_mean,jnp.ones(Y.shape[1])*length_pol_std))
+    #var_pol = numpyro.sample("kernel_varpol", dist.HalfNormal(jnp.ones(Y.shape[1])*var_pol_std))
+    #length_pol = numpyro.sample("kernel_lengthpol", dist.Normal(jnp.ones(Y.shape[1])*length_pol_mean,jnp.ones(Y.shape[1])*length_pol_std))
 
     # compute kernel
     X=jnp.repeat(jnp.array([X]),Y.shape[1],axis=0)
-    
+
     vmap_args = (
-        X,X,var_fg,length_fg,var_pol,length_pol
+        X,X,var_fg,length_fg#,var_pol,length_pol
     )
     
-    #using vmap to calculate k in batch
     k = vmap(
-        lambda X,  Z,var_fg,length_fg,var_pol,length_pol: kernel_pol(
-            X, Z,var_fg,length_fg,var_pol,length_pol,var_HI,length_HI,noise
+        lambda X,  Z,var_fg,length_fg: kernel(
+            X, Z,var_fg,length_fg,var_HI,length_HI,noise
         )
     )(*vmap_args)
     
-    #this is for calculating the likelihood
     numpyro.sample(
         "Y",
         dist.MultivariateNormal(loc=jnp.zeros((Y.shape[1],Y.shape[2])), covariance_matrix=k),
@@ -211,6 +208,6 @@ samples,mcmc = main()
 
 import pickle
 #pickle the whole object for post analysis
-param_file = open('samples_hgp_pol.bin', 'wb')
+param_file = open('samples_hgp_nopol.bin', 'wb')
 pickle.dump(mcmc, param_file)
 param_file.close()
