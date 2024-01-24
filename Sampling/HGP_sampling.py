@@ -198,7 +198,7 @@ def run_inference(model,init_strategy, rng_key, X, Y):
 def main():
     #selected = np.concatenate([np.arange(64),np.arange(32)+128,np.arange(32)+224])
     selected = None
-    X, Y, X_test = get_data(pol=True,dim=256,x0=0,y0=0,freqs=256,superpixel=superpixel,selected=selected)
+    X, Y = get_data(pol=True,dim=256,x0=0,y0=0,freqs=256,superpixel=superpixel,selected=selected)
 
     # do inference
     rng_key, rng_key_predict = random.split(random.PRNGKey(42))
