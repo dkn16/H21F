@@ -6,7 +6,7 @@ An Gaussian Process based 21-cm foreground separation code, including codes for 
 
 ## Presiquities
 
-JAX, numpyro, ArviZ, GP4IM (For evaluation only) and Kymatio (For evaluation only).
+[JAX](https://jax.readthedocs.io), [numpyro](https://num.pyro.ai), [ArviZ](https://python.arviz.org/), [GPR4IM](https://github.com/paulassoares/gpr4im) (For evaluation only) and [Kymatio](https://www.kymat.io) (For evaluation only).
 
 ## Usage
 
@@ -20,6 +20,8 @@ For **CP** (conventional) method, the sampling and component separation are inte
 
 For **HGP** and **NP**, sampling codes are in the `Sampling` folder. After getting posterier samples, using notebooks in `Prediction` folder to do the component separation.
 
+suffix `_nopol` means only two kernels are adopted, one for modeling the foreground and one for modeling the 21 cm emission. `_pol` means three kernels are used, for foreground, polarization leakage and 21 cm, respectively.
+
 ### Post analysis and evaluation
 
-See notebooks in `Evaluation` folder.
+See notebooks in `Evaluation` folder. (Pending)
