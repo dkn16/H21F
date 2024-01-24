@@ -33,12 +33,15 @@ HI = data.beam.HI
 noise = data.beam.noise
 freqs = data.freqs
 
+superpixel = 16
+
 # read and resize our data
 def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None):
     #dim,freqs: the datasize is (dim,dim,freqs)
     #pol(bool): if True, include the polarization leakage data
     #x0,y0: starting coordinates. e.g. pixels within x0:x0+dim will be included in the data.
     #superpixel: if larger than one, reshape the data to be (x_sp,y_sp,x_withinsp,y_withinsp,freq). In this case, data[0][0] is all pixels within superpixel (0,0)
+    #selected: indexes to select several channels.
     
     #foreground
     if pol:
@@ -72,8 +75,6 @@ def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None)
         Y = Y[:,:,selected]
 
     return X, Y
-
-superpixel = 16
 
 # RBF kernel for fg, exponential kernel for HI, and a diagonal noise kernel
 def kernel(X, Z, var, length,var_HI,length_HI, noise, jitter=1.0e-16,is_noise=True):
