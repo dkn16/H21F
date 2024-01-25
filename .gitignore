@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#mcmc object
+*.bin
+
+#separated 21 cm signal
+*.npy

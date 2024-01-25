@@ -32,8 +32,8 @@ See notebooks in `Evaluation` folder.
 
 - `Visualization`: draw images of recovered 21 cm signal.
 
-- `Residuals`:
+- `Residuals`: calculate residuals of the recovered 21 cm signal.
 
-- `Powerspectrum`:
+- `Powerspectrum`: calculate the power-spectrum of the recovered 21 cm signal.
 
-- `ST`:
+- `ST`: calculate the scattering transform coefficients of the recovered 21 cm signal.
