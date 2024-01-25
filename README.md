@@ -24,6 +24,16 @@ After getting the object, using notebooks in `Prediction` folder to do the compo
 
 suffix `_nopol` means only two kernels are adopted, one for modeling the foreground and one for modeling the 21 cm emission. `_pol` means three kernels are used, for foreground, polarization leakage and 21 cm, respectively.
 
+bias correction. (pending)
+
 ### Post analysis and evaluation
 
-See notebooks in `Evaluation` folder. (Pending)
+See notebooks in `Evaluation` folder.
+
+- `Visualization`: draw images of recovered 21 cm signal.
+
+- `Residuals`:
+
+- `Powerspectrum`:
+
+- `ST`:
