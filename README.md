@@ -33,7 +33,9 @@ bias correction. (pending)
 
 ### Post analysis and evaluation
 
-See notebooks in `Evaluation` folder.
+![visualization](Recovery.png)
+
+See notebooks in `Evaluation` folder:
 
 - `Visualization`: draw images of recovered 21 cm signal.
 
@@ -42,3 +44,9 @@ See notebooks in `Evaluation` folder.
 - `Powerspectrum`: calculate the power-spectrum of the recovered 21 cm signal.
 
 - `ST`: calculate the scattering transform coefficients of the recovered 21 cm signal.
+
+## Acknowlegdements
+
+please consider cite xxx-xxx-xxxx
+
+This code is heavily based on `numpyro` and `JAX`. Please also consider site this two package.
