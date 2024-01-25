@@ -18,7 +18,7 @@ This code has some specifically designed reading function to read the data in [t
 
 For **CP** (conventional) method, the sampling and component separation are integrated into one notebook ([CP_sampling_prediction.ipynb](https://github.com/dkn16/GP21cmFg/blob/main/CP_sampling_prediction.ipynb)), as it is fast.
 
-For **HGP** and **NP**, sampling codes are in the `Sampling` folder. After running the scripts there, one is supposed to get a pickled numpyro MCMC object.
+For **HGP** and **NP**, sampling codes are in the `Sampling` folder. After running the scripts there, one is supposed to get a pickled numpyro MCMC object. Be careful about the **directory** to saving the object.
 
 After getting the object, using notebooks in `Prediction` folder to do the component separation.
 

@@ -201,10 +201,11 @@ numpyro.set_platform('gpu')
 numpyro.set_host_device_count(1)
 
 #due to limited memory of our GPU, we devided the whole datacube into 64 smaller cube of size (32,32,256)
-import pickle
+import pickle,os
+os.system('mkdir samples_np_pol')
 for i in range(8):
     for j in range(8):
         samples,mcmc = main(x0=32*i,y0=32*j)
-        athletes_file = open('/work/dkn16/GP21cmFg/samples_np_pol_suppix1/samples_np_pol_suppix1_'+str(8*i+j)+'.pkl', 'wb')
+        athletes_file = open('samples_np_pol/samples_np_pol_suppix1_'+str(8*i+j)+'.pkl', 'wb')
         pickle.dump(mcmc, athletes_file)
         athletes_file.close()
