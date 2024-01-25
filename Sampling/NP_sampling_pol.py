@@ -201,6 +201,7 @@ numpyro.set_platform('gpu')
 numpyro.set_host_device_count(1)
 
 #due to limited memory of our GPU, we devided the whole datacube into 64 smaller cube of size (32,32,256)
+#In this case we have 64 subcubes, 64 mcmc objects, thus we make a directory to store them
 import pickle,os
 os.system('mkdir samples_np_pol')
 for i in range(8):
