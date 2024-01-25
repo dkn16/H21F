@@ -33,7 +33,8 @@ HI = data.beam.HI
 noise = data.beam.noise
 freqs = data.freqs
 
-superpixel = 16
+#we do not use superpixel scheme here, instead we fit every single sightline.
+superpixel = 1
 
 # read and resize our data
 def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None):
@@ -76,6 +77,8 @@ def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None)
 
     return X, Y
 
+
+
 # RBF kernel for fg, exponential kernel for HI, and a diagonal noise kernel
 def kernel(X, Z, var, length,var_HI,length_HI, noise, jitter=1.0e-16,is_noise=True):
     deltaXsq = jnp.power((X[:, None] - Z) / length, 2.0)
@@ -105,30 +108,20 @@ def kernel_pol(X, Z, var, length,var_pol,length_pol,var_HI,length_HI, noise, jit
     return k_fg + k_pol
 
 def model(X, Y):
-    #set weakly-informative log-normal priors on all kernel hyperparameters
-    var_fg_std = numpyro.sample("varfg_std", dist.LogNormal(0,4))
+    # set uninformative log-normal priors on our three kernel hyperparameters
+    noise = numpyro.sample("kernel_noise", dist.Uniform(0,100))
     
-    length_fg_alpha = numpyro.sample("length_fg_alpha",dist.LogNormal(1,4))
-    length_fg_beta = numpyro.sample("length_fg_beta",dist.LogNormal(0,4))
-    
-    noise = numpyro.sample("kernel_noise", dist.HalfNormal(10))
-    
-    
-    var_pol_std = numpyro.sample("varpol_std", dist.LogNormal(0,4))
-    
-    length_pol_mean = numpyro.sample("length_pol_mean",dist.LogNormal(1,4))
-    length_pol_std = numpyro.sample("length_pol_std",dist.LogNormal(0,4))
-    
-    var_HI = numpyro.sample("kernel_varHI", dist.HalfNormal(1))
+    var_HI = numpyro.sample("kernel_varHI",  dist.HalfNormal(1))
     length_HI = numpyro.sample("kernel_lengthHI",dist.HalfNormal(2))
-    var_fg = numpyro.sample("kernel_var", dist.HalfNormal(jnp.ones(Y.shape[1])*var_fg_std))
-    length_fg = numpyro.sample("kernel_length", dist.InverseGamma(jnp.ones(Y.shape[1])*length_fg_alpha,jnp.ones(Y.shape[1])*length_fg_beta))
-    var_pol = numpyro.sample("kernel_varpol", dist.HalfNormal(jnp.ones(Y.shape[1])*var_pol_std))
-    length_pol = numpyro.sample("kernel_lengthpol", dist.InverseGamma(jnp.ones(Y.shape[1])*length_pol_mean,jnp.ones(Y.shape[1])*length_pol_std))
+
+    var_fg = numpyro.sample("kernel_var", dist.LogNormal(jnp.zeros(Y.shape[1]),4*jnp.ones(Y.shape[1])))
+    length_fg = numpyro.sample("kernel_length", dist.InverseGamma(jnp.ones(Y.shape[1])*2,jnp.ones(Y.shape[1])*1))
+
+    var_pol = numpyro.sample("kernel_varpol", dist.LogNormal(jnp.zeros(Y.shape[1]),4*jnp.ones(Y.shape[1])))
+    length_pol = numpyro.sample("kernel_lengthpol",  dist.InverseGamma(jnp.ones(Y.shape[1])*5,jnp.ones(Y.shape[1])*1))
 
     # compute kernel
     X=jnp.repeat(jnp.array([X]),Y.shape[1],axis=0)
-    
     vmap_args = (
         X,X,var_fg,length_fg,var_pol,length_pol
     )
@@ -193,12 +186,11 @@ def run_inference(model,init_strategy, rng_key, X, Y):
     return mcmc.get_samples(),mcmc
 
 
-
-
-def main():
+def main(x0 = 0,y0 = 0):
     #selected = np.concatenate([np.arange(64),np.arange(32)+128,np.arange(32)+224])
     selected = None
-    X, Y = get_data(pol=True,dim=256,x0=0,y0=0,freqs=256,superpixel=superpixel,selected=selected)
+    X, Y, X_test = get_data(pol=True,dim=32,x0=x0,y0=y0,freqs=256,superpixel=superpixel,selected=selected)
+    print(Y.shape)
 
     # do inference
     rng_key, rng_key_predict = random.split(random.PRNGKey(42))
@@ -207,10 +199,12 @@ def main():
 
 numpyro.set_platform('gpu')
 numpyro.set_host_device_count(1)
-samples,mcmc = main()
 
+#due to limited memory of our GPU, we devided the whole datacube into 64 smaller cube of size (32,32,256)
 import pickle
-#pickle the whole object for post analysis
-param_file = open('samples_hgp_pol.bin', 'wb')
-pickle.dump(mcmc, param_file)
-param_file.close()
+for i in range(8):
+    for j in range(8):
+        samples,mcmc = main(x0=32*i,y0=32*j)
+        athletes_file = open('/work/dkn16/GP21cmFg/samples_np_pol_suppix1/samples_np_pol_suppix1_'+str(8*i+j)+'.pkl', 'wb')
+        pickle.dump(mcmc, athletes_file)
+        athletes_file.close()
