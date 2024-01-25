@@ -1,7 +1,7 @@
 #first import dependencies, mainly jax and numpyro
 import time
 
-#we change the config to use 
+#we change the config to use fp64
 from jax.config import config
 config.update("jax_enable_x64", True)
 
@@ -37,7 +37,7 @@ freqs = data.freqs
 superpixel = 1
 
 # read and resize our data
-def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None):
+def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = None,selected = None):
     #dim,freqs: the datasize is (dim,dim,freqs)
     #pol(bool): if True, include the polarization leakage data
     #x0,y0: starting coordinates. e.g. pixels within x0:x0+dim will be included in the data.
@@ -65,7 +65,7 @@ def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None)
     Y = sky+cosmos
 
 
-    if superpixel >1:
+    if superpixel is not None:
         Y = Y.reshape((dim,dim,freqs))
         Y = Y.reshape((int(dim/superpixel),superpixel,int(dim/superpixel),superpixel,freqs)).transpose((0,2,1,3,4))
         Y = Y.reshape((int(int(dim/superpixel)**2),-1,freqs)).transpose((1,0,2))
@@ -73,7 +73,7 @@ def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None)
     
     if selected is not None:
         X = X[selected]
-        Y = Y[:,:,selected]
+        Y = Y[...,selected]
 
     return X, Y
 
@@ -189,8 +189,8 @@ def run_inference(model,init_strategy, rng_key, X, Y):
 def main(x0 = 0,y0 = 0):
     #selected = np.concatenate([np.arange(64),np.arange(32)+128,np.arange(32)+224])
     selected = None
-    X, Y, X_test = get_data(pol=True,dim=32,x0=x0,y0=y0,freqs=256,superpixel=superpixel,selected=selected)
-    print(Y.shape)
+    X, Y = get_data(pol=True,dim=32,x0=x0,y0=y0,freqs=256,superpixel=superpixel,selected=selected)
+    print(Y.shape)#for check
 
     # do inference
     rng_key, rng_key_predict = random.split(random.PRNGKey(42))
@@ -206,6 +206,6 @@ os.system('mkdir samples_np_pol')
 for i in range(8):
     for j in range(8):
         samples,mcmc = main(x0=32*i,y0=32*j)
-        athletes_file = open('samples_np_pol/samples_np_pol_suppix1_'+str(8*i+j)+'.pkl', 'wb')
-        pickle.dump(mcmc, athletes_file)
-        athletes_file.close()
+        mcmc_file = open('samples_np_pol/samples_np_pol_suppix1_'+str(8*i+j)+'.pkl', 'wb')
+        pickle.dump(mcmc, mcmc_file)
+        mcmc_file.close()

@@ -35,8 +35,7 @@ freqs = data.freqs
 
 superpixel = 16
 
-# read and resize our data
-def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None):
+def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = None,selected = None):
     #dim,freqs: the datasize is (dim,dim,freqs)
     #pol(bool): if True, include the polarization leakage data
     #x0,y0: starting coordinates. e.g. pixels within x0:x0+dim will be included in the data.
@@ -64,7 +63,7 @@ def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None)
     Y = sky+cosmos
 
 
-    if superpixel >1:
+    if superpixel is not None:
         Y = Y.reshape((dim,dim,freqs))
         Y = Y.reshape((int(dim/superpixel),superpixel,int(dim/superpixel),superpixel,freqs)).transpose((0,2,1,3,4))
         Y = Y.reshape((int(int(dim/superpixel)**2),-1,freqs)).transpose((1,0,2))
@@ -72,7 +71,7 @@ def get_data(dim,pol=False,x0=0,y0=0,freqs = 285,superpixel = 1,selected = None)
     
     if selected is not None:
         X = X[selected]
-        Y = Y[:,:,selected]
+        Y = Y[...,selected]
 
     return X, Y
 
