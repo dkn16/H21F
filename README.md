@@ -23,9 +23,9 @@ This code has some specifically designed reading function to read the data in [t
 
 For **CP** (conventional) method, the sampling and component separation are integrated into one notebook ([CP_sampling_prediction.ipynb](https://github.com/dkn16/GP21cmFg/blob/main/CP_sampling_prediction.ipynb)), as it is fast.
 
-For **HGP** and **NP**, sampling codes are in the `Sampling` folder. After running the scripts there, one is supposed to get a pickled numpyro MCMC object. Be careful about the **directory** to saving the object.
+For **HGP** and **NP**, sampling codes are in the `Sampling` folder. After running the scripts there, one is supposed to get a pickled numpyro MCMC object. Be careful about the **directory** for saving the object.
 
-After getting the object, using notebooks in `Prediction` folder to do the component separation.
+After getting the object, use notebooks in `Prediction` folder to do the component separation.
 
 suffix `_nopol` means only two kernels are adopted, one for modeling the foreground and one for modeling the 21 cm emission. `_pol` means three kernels are used, for foreground, polarization leakage and 21 cm, respectively.
 
@@ -37,7 +37,7 @@ bias correction. (pending)
 
 See notebooks in `Evaluation` folder:
 
-- `Visualization`: draw images of recovered 21 cm signal.
+- `Visualization`: draw images of the recovered 21 cm signal.
 
 - `Residuals`: calculate residuals of the recovered 21 cm signal.
 
