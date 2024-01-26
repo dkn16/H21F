@@ -29,7 +29,7 @@ After getting the object, use notebooks in `Prediction` folder to do the compone
 
 suffix `_nopol` means only two kernels are adopted, one for modeling the foreground and one for modeling the 21 cm emission. `_pol` means three kernels are used, for foreground, polarization leakage and 21 cm, respectively.
 
-bias correction. (pending)
+The last parts in the prediction notebook shows the bias correction following Mertens et al.. It provides a method to conpensates for the lost large scale power due to calculating the expectation only.
 
 ### Post analysis and evaluation
 
