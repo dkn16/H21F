@@ -1,6 +1,6 @@
 # Hierachical Gaussian process 21 cm foreground removal (H21F)
 
-A Gaussian Process based 21-cm foreground separation code, including codes for sampling, separation, and evaluation.
+Hierachical Gaussian process 21 cm foreground removal (H21F, pronounced as *half*) is a Gaussian Process based 21-cm foreground separation code, including codes for sampling, separation, and evaluation.
 
 ## Introduction
 
